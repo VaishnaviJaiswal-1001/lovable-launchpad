@@ -5,20 +5,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, MapPin, Users, Clock, UserCheck, ArrowLeft } from "lucide-react";
+import { CalendarDays, MapPin, Users, Clock, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import TeamSection from "@/components/events/TeamSection";
 import ScheduleSection from "@/components/events/ScheduleSection";
 import AttendeeList from "@/components/events/AttendeeList";
+import RegistrationConfirmDialog from "@/components/events/RegistrationConfirmDialog";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, role } = useAuth();
+  const { user, role, profile } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAdmin = role === "admin";
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { data: event } = useQuery({
     queryKey: ["event", id],
@@ -45,9 +48,25 @@ const EventDetail = () => {
         user_id: user!.id,
       });
       if (error) throw error;
+
+      // Trigger registration email via edge function
+      try {
+        await supabase.functions.invoke("send-registration-email", {
+          body: {
+            participantName: profile?.full_name || user?.email || "Participant",
+            participantEmail: profile?.email || user?.email,
+            eventTitle: event?.title,
+            eventDate: format(new Date(event!.start_date), "MMM d, yyyy 'at' h:mm a"),
+            eventVenue: event?.venue,
+          },
+        });
+      } catch (emailErr) {
+        console.error("Email notification failed:", emailErr);
+      }
     },
     onSuccess: () => {
-      toast.success("Registered successfully!");
+      toast.success("Registered successfully! A confirmation email has been sent.");
+      setConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["my-registration", id] });
       queryClient.invalidateQueries({ queryKey: ["event-registrations", id] });
     },
@@ -78,7 +97,7 @@ const EventDetail = () => {
                 <Button
                   className="gradient-primary"
                   disabled={isRegistered || registerMutation.isPending}
-                  onClick={() => registerMutation.mutate()}
+                  onClick={() => setConfirmOpen(true)}
                 >
                   {isRegistered ? "✓ Registered" : "Register Now"}
                 </Button>
@@ -118,6 +137,18 @@ const EventDetail = () => {
       <TeamSection eventId={id!} maxTeamSize={event.max_team_size || 4} isRegistered={isRegistered} />
 
       {isAdmin && <AttendeeList eventId={id!} />}
+
+      {/* Registration Confirmation Dialog */}
+      {event && profile && (
+        <RegistrationConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          event={event}
+          profile={{ full_name: profile.full_name, email: profile.email }}
+          onConfirm={() => registerMutation.mutate()}
+          isPending={registerMutation.isPending}
+        />
+      )}
     </div>
   );
 };
