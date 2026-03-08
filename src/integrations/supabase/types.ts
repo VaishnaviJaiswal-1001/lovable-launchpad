@@ -14,16 +14,299 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_schedules: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_time: string
+          event_id: string
+          id: string
+          start_time: string
+          title: string
+          venue: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_time: string
+          event_id: string
+          id?: string
+          start_time: string
+          title: string
+          venue?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          event_id?: string
+          id?: string
+          start_time?: string
+          title?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_schedules_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string
+          id: string
+          max_participants: number | null
+          max_team_size: number | null
+          start_date: string
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date: string
+          id?: string
+          max_participants?: number | null
+          max_team_size?: number | null
+          start_date: string
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          max_participants?: number | null
+          max_team_size?: number | null
+          start_date?: string
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          message: string
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          checked_in: boolean
+          checked_in_at: string | null
+          event_id: string
+          id: string
+          registered_at: string
+          team_id: string | null
+          user_id: string
+        }
+        Insert: {
+          checked_in?: boolean
+          checked_in_at?: string | null
+          event_id: string
+          id?: string
+          registered_at?: string
+          team_id?: string | null
+          user_id: string
+        }
+        Update: {
+          checked_in?: boolean
+          checked_in_at?: string | null
+          event_id?: string
+          id?: string
+          registered_at?: string
+          team_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          leader_id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          leader_id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          leader_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "participant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +433,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "participant"],
+    },
   },
 } as const
