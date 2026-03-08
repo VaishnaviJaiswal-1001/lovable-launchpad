@@ -112,7 +112,7 @@
     box-shadow: var(--shadow-lg);
   }
   .glass-hero {
-    @apply bg-card/60 backdrop-blur-3xl border border-white/20;
+    @apply bg-card/60 backdrop-blur-2xl border border-border/20;
     box-shadow: var(--shadow-xl), inset 0 1px 0 0 hsl(0 0% 100% / 0.1);
   }
   .text-gradient {
