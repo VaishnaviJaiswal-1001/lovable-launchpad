@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Users, Clock } from "lucide-react";
+import { CalendarDays, Users, Clock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 
 const ParticipantDashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const { data: myRegistrations } = useQuery({
     queryKey: ["my-registrations", user?.id],
@@ -40,89 +40,98 @@ const ParticipantDashboard = () => {
     (r) => r.events && new Date(r.events.start_date) > new Date()
   ) || [];
 
+  const stats = [
+    { label: "Registered Events", value: myRegistrations?.length || 0, icon: CalendarDays, color: "bg-primary/10 text-primary" },
+    { label: "Teams Joined", value: myTeams?.length || 0, icon: Users, color: "bg-accent/10 text-accent" },
+    { label: "Upcoming Events", value: upcomingEvents.length, icon: Clock, color: "bg-warning/10 text-warning" },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Welcome header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold">My Dashboard</h1>
-          <p className="text-muted-foreground">Your events and teams at a glance</p>
+          <h1 className="section-title text-3xl">
+            Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
+          </h1>
+          <p className="section-subtitle">Your events and teams at a glance</p>
         </div>
         <Link to="/events">
-          <Button className="gradient-primary">Browse Events</Button>
+          <Button className="gradient-primary gap-2 rounded-full px-6 shadow-glow">
+            Browse Events <ArrowRight className="h-4 w-4" />
+          </Button>
         </Link>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                <CalendarDays className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-display font-bold">{myRegistrations?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">Registered Events</p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                <Users className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-display font-bold">{myTeams?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">Teams Joined</p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-warning/10 text-warning">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-display font-bold">{upcomingEvents.length}</p>
-                <p className="text-xs text-muted-foreground">Upcoming Events</p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {stats.map((stat, i) => (
+          <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+            <Card className="shadow-card border-border/40 hover-lift">
+              <CardContent className="pt-6 pb-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-3xl font-display font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
+                  </div>
+                  <div className={`stat-icon ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>My Registered Events</CardTitle>
+      {/* Registered events */}
+      <Card className="shadow-card border-border/40">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">My Registered Events</CardTitle>
         </CardHeader>
         <CardContent>
           {myRegistrations && myRegistrations.length > 0 ? (
-            <div className="space-y-3">
-              {myRegistrations.map((reg) => (
+            <div className="space-y-2">
+              {myRegistrations.map((reg, i) => (
                 <Link key={reg.id} to={`/events/${reg.event_id}`} className="block">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <div>
-                      <p className="font-medium text-sm">{reg.events?.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {reg.events?.start_date && format(new Date(reg.events.start_date), "MMM d, yyyy")}
-                        {reg.events?.venue && ` · ${reg.events.venue}`}
-                      </p>
+                  <motion.div
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <CalendarDays className="h-4.5 w-4.5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm group-hover:text-primary transition-colors">{reg.events?.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {reg.events?.start_date && format(new Date(reg.events.start_date), "MMM d, yyyy")}
+                          {reg.events?.venue && ` · ${reg.events.venue}`}
+                        </p>
+                      </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${reg.checked_in ? "bg-success/10 text-success" : "bg-primary/10 text-primary"}`}>
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                      reg.checked_in
+                        ? "bg-success/10 text-success"
+                        : "bg-primary/10 text-primary"
+                    }`}>
                       {reg.checked_in ? "Checked In" : "Registered"}
                     </span>
-                  </div>
+                  </motion.div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">You haven't registered for any events yet</p>
+            <div className="text-center py-10">
+              <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+                <CalendarDays className="h-7 w-7 text-muted-foreground/40" />
+              </div>
+              <p className="text-muted-foreground font-medium text-sm">No events yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1 mb-4">Browse events to get started</p>
               <Link to="/events">
-                <Button variant="outline">Browse Events</Button>
+                <Button variant="outline" size="sm" className="rounded-full">Browse Events</Button>
               </Link>
             </div>
           )}

@@ -37,8 +37,10 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="fixed inset-0 gradient-mesh pointer-events-none" />
+
       {/* Top nav */}
-      <header className="sticky top-0 z-50 glass-strong border-b border-border/30">
+      <header className="sticky top-0 z-50 bg-card/70 backdrop-blur-2xl border-b border-border/30">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-2.5">
@@ -47,24 +49,26 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               </div>
               <span className="font-display font-bold text-lg tracking-tight">Manageve</span>
             </Link>
-            <Badge variant="secondary" className="hidden sm:inline-flex text-xs rounded-full">
+            <Badge className="hidden sm:inline-flex text-[10px] rounded-full px-2.5 py-0.5 bg-muted text-muted-foreground border-0 font-medium">
               {isAdmin ? "Admin" : "Participant"}
             </Badge>
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const active = location.pathname === item.to;
+          <nav className="hidden md:flex items-center gap-1 bg-muted/50 rounded-full p-1">
+            {navItems.map((navItem) => {
+              const active = location.pathname === navItem.to;
               return (
-                <Link key={item.to} to={item.to}>
+                <Link key={navItem.to} to={navItem.to}>
                   <Button
                     variant={active ? "default" : "ghost"}
                     size="sm"
-                    className={`gap-2 rounded-full ${active ? "shadow-md" : ""}`}
+                    className={`gap-2 rounded-full h-9 px-4 text-xs font-medium ${
+                      active ? "shadow-md" : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
+                    <navItem.icon className="h-3.5 w-3.5" />
+                    {navItem.label}
                   </Button>
                 </Link>
               );
@@ -72,16 +76,21 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
           </nav>
 
           <div className="flex items-center gap-2">
-            <span className="hidden sm:block text-sm text-muted-foreground">
-              {profile?.full_name || user?.email}
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="rounded-full">
+            <div className="hidden sm:flex items-center gap-2 mr-1">
+              <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                {(profile?.full_name?.[0] || user?.email?.[0] || "U").toUpperCase()}
+              </div>
+              <span className="text-sm font-medium text-foreground max-w-[120px] truncate">
+                {profile?.full_name || user?.email}
+              </span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full h-9 w-9 text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="md:hidden rounded-full"
+              size="icon"
+              className="md:hidden rounded-full h-9 w-9"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -96,16 +105,16 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="md:hidden border-t border-border/30 overflow-hidden"
+              className="md:hidden border-t border-border/30 overflow-hidden bg-card/80 backdrop-blur-xl"
             >
               <nav className="container py-3 flex flex-col gap-1">
-                {navItems.map((item) => {
-                  const active = location.pathname === item.to;
+                {navItems.map((navItem) => {
+                  const active = location.pathname === navItem.to;
                   return (
-                    <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}>
-                      <Button variant={active ? "default" : "ghost"} size="sm" className="w-full justify-start gap-2 rounded-lg">
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
+                    <Link key={navItem.to} to={navItem.to} onClick={() => setMobileOpen(false)}>
+                      <Button variant={active ? "default" : "ghost"} size="sm" className="w-full justify-start gap-2 rounded-xl h-10">
+                        <navItem.icon className="h-4 w-4" />
+                        {navItem.label}
                       </Button>
                     </Link>
                   );
@@ -116,12 +125,12 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         </AnimatePresence>
       </header>
 
-      <main className="container py-8">
+      <main className="container py-8 relative z-10">
         <motion.div
           key={location.pathname}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           {children}
         </motion.div>
