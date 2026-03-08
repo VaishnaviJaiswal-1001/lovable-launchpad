@@ -77,7 +77,7 @@ const Auth = () => {
           <p className="text-muted-foreground mt-1">Smart Event Management Platform</p>
         </div>
 
-        <Card className="shadow-lg border-border/50">
+        <Card className="shadow-lg border-border/40 glass-strong">
           <Tabs defaultValue="login">
             <CardHeader className="pb-3">
               <TabsList className="grid w-full grid-cols-2">

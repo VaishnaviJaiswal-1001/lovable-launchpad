@@ -63,7 +63,7 @@ const Events = () => {
             return (
               <motion.div key={event.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <Link to={`/events/${event.id}`}>
-                  <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden">
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden shadow-card">
                     <div className={`h-2 ${isPast ? "bg-muted" : "gradient-primary"}`} />
                     <CardContent className="pt-4 space-y-3">
                       <div className="flex items-start justify-between">
