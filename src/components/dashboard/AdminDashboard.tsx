@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Users, UserCheck, Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, Users, UserCheck, Bell, Crown, Mail, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -24,6 +26,24 @@ const AdminDashboard = () => {
       return data || [];
     },
     enabled: !!user,
+  });
+
+  const { data: teams } = useQuery({
+    queryKey: ["admin-all-teams"],
+    queryFn: async () => {
+      const { data } = await supabase.from("teams").select("*, team_members(user_id)");
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Build userId -> team info map
+  const userTeamMap = new Map<string, { teamName: string; isLeader: boolean }>();
+  teams?.forEach((team) => {
+    const memberIds = (team.team_members as any[])?.map((m: any) => m.user_id) || [];
+    memberIds.forEach((uid: string) => {
+      userTeamMap.set(uid, { teamName: team.name, isLeader: team.leader_id === uid });
+    });
   });
 
   const totalEvents = events?.length || 0;
@@ -47,7 +67,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-            <Card>
+            <Card className="shadow-card">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
@@ -64,27 +84,53 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      <Card>
+      <Card className="shadow-card">
         <CardHeader>
           <CardTitle>Recent Registrations</CardTitle>
         </CardHeader>
         <CardContent>
           {registrations && registrations.length > 0 ? (
-            <div className="space-y-3">
-              {registrations.slice(0, 10).map((reg) => (
-                <div key={reg.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div>
-                    <p className="font-medium text-sm">{(reg as any).profiles?.full_name || "Unknown"}</p>
-                    <p className="text-xs text-muted-foreground">{(reg as any).events?.title}</p>
+            <div className="space-y-2">
+              {registrations.slice(0, 15).map((reg) => {
+                const profile = (reg as any).profiles;
+                const teamInfo = userTeamMap.get(reg.user_id);
+
+                return (
+                  <div key={reg.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/40 border border-border/40">
+                    <div className="space-y-1.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-sm">{profile?.full_name || "Unknown"}</p>
+                        <Badge variant="outline" className="text-xs rounded-full">
+                          {(reg as any).events?.title}
+                        </Badge>
+                        {teamInfo && (
+                          <Badge variant="secondary" className="text-xs gap-1 rounded-full">
+                            {teamInfo.isLeader && <Crown className="h-3 w-3 text-warning" />}
+                            <Users className="h-3 w-3" />
+                            {teamInfo.teamName}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          {profile?.email}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {format(new Date(reg.registered_at), "MMM d 'at' h:mm a")}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-3 py-1 rounded-full shrink-0 ${reg.checked_in ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+                      {reg.checked_in ? "Checked In" : "Registered"}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${reg.checked_in ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
-                    {reg.checked_in ? "Checked In" : "Registered"}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm">No registrations yet</p>
+            <p className="text-muted-foreground text-sm text-center py-6">No registrations yet</p>
           )}
         </CardContent>
       </Card>
