@@ -86,7 +86,14 @@ const EventDetail = () => {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="overflow-hidden">
-          <div className={`h-3 ${isPast ? "bg-muted" : "gradient-primary"}`} />
+          {event.banner_url ? (
+            <div className="relative w-full h-48 md:h-64 overflow-hidden">
+              <img src={event.banner_url} alt={event.title} className="w-full h-full object-cover" />
+              {isPast && <div className="absolute inset-0 bg-background/60" />}
+            </div>
+          ) : (
+            <div className={`h-3 ${isPast ? "bg-muted" : "gradient-primary"}`} />
+          )}
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
