@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import MyTeams from "./pages/MyTeams";
+import JoinTeam from "./pages/JoinTeam";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 

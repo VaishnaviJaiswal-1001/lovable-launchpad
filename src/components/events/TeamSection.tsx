@@ -158,7 +158,7 @@ const TeamSection = ({ eventId, maxTeamSize, isRegistered }: Props) => {
         {/* My Team highlight */}
         {myTeam && (
           <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-4 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4 text-primary" />
                 <span className="font-display font-semibold">{myTeam.name}</span>
@@ -166,6 +166,17 @@ const TeamSection = ({ eventId, maxTeamSize, isRegistered }: Props) => {
                 <span className="text-xs text-muted-foreground">({myTeam.team_members?.length || 0}/{maxTeamSize})</span>
               </div>
               <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/join-team/${myTeam.id}`);
+                    toast.success("Invite link copied!");
+                  }}
+                >
+                  <Copy className="h-3 w-3" /> Invite Link
+                </Button>
                 {myTeam.leader_id === user?.id ? (
                   <Button
                     size="sm"
