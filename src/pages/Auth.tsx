@@ -70,11 +70,11 @@ const Auth = () => {
         className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
-          <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4">
+          <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-glow">
             <CalendarDays className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-display font-bold">EventHub</h1>
-          <p className="text-muted-foreground mt-1">Multi-Event Management Platform</p>
+          <h1 className="text-3xl font-display font-bold tracking-tight">Manageve</h1>
+          <p className="text-muted-foreground mt-1">Smart Event Management Platform</p>
         </div>
 
         <Card className="shadow-lg border-border/50">
